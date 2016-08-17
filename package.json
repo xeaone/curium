@@ -1,0 +1,33 @@
+{
+  "name": "curium",
+  "version": "1.0.0",
+  "description": "Curium - Web Component Library/Framework Powerful &amp; Small",
+  "main": "curium.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexanderElias/curium.git"
+  },
+  "keywords": [
+    "web",
+    "components",
+    "component.",
+    "web-component",
+    "web-components",
+    "library",
+    "browser",
+    "polymer",
+    "curium",
+    "data-binding",
+    "data",
+    "binding"
+  ],
+  "author": "Alexander Elias",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/AlexanderElias/curium/issues"
+  },
+  "homepage": "https://github.com/AlexanderElias/curium#readme"
+}

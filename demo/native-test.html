@@ -1,0 +1,52 @@
+
+<template>
+	<p>Hello World</p>
+</template>
+
+<script type="text/javascript">
+
+	// var template = document._currentScript.ownerDocument.querySelector('template');
+	// var template = '<p>Hello World</p>';
+	var template = function () {/*
+
+		<p>Hello World</p>
+
+	*/};
+
+	window.addEventListener('CuriumLoaded', function () {
+
+		Curium.component('native-test', {
+			template: template,
+			attributes: function (attributeObject) {
+				console.log('attributes');
+				console.log(this);
+			},
+			created: function (documentFragment) {
+				console.log('created');
+
+				var span = document.createElement('span');
+				span.innerText = 'created';
+				documentFragment.appendChild(span);
+
+				return documentFragment;
+			},
+			attached: function () {
+				console.log('attached');
+			},
+			detached: function () {
+				console.log('detached');
+			},
+			attributed: function (attribute) {
+				console.log('attributed');
+				console.log(attributeName);
+			}
+		});
+
+		setTimeout(function () {
+			console.log(template.content.querySelector('p'))
+			console.log(template)
+		}, 2000);
+
+	});
+
+</script>
