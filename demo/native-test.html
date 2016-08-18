@@ -5,48 +5,41 @@
 
 <script type="text/javascript">
 
-	// var template = document._currentScript.ownerDocument.querySelector('template');
-	// var template = '<p>Hello World</p>';
-	var template = function () {/*
+	var templateElement = document._currentScript.ownerDocument.querySelector('template');
 
-		<p>Hello World</p>
+	var templateString = '<template><p>templateString</p></template>';
+
+	var templateMultiline = function () {/*!@preserve
+
+		<template>
+			<p>templateMultiline</p>
+		</template>
 
 	*/};
 
-	window.addEventListener('CuriumLoaded', function () {
+	Curium.component({
+		tag: 'native-test',
+		templateUrl: 'template.html',
+		// templateMultiline: templateString,
+		// templateMultiline: templateMultiline,
+		// templateQuery: 'template',
+		created: function (source, target) {
+			console.log('created');
 
-		Curium.component('native-test', {
-			template: template,
-			attributes: function (attributeObject) {
-				console.log('attributes');
-				console.log(this);
-			},
-			created: function (documentFragment) {
-				console.log('created');
-
-				var span = document.createElement('span');
-				span.innerText = 'created';
-				documentFragment.appendChild(span);
-
-				return documentFragment;
-			},
-			attached: function () {
-				console.log('attached');
-			},
-			detached: function () {
-				console.log('detached');
-			},
-			attributed: function (attribute) {
-				console.log('attributed');
-				console.log(attributeName);
-			}
-		});
-
-		setTimeout(function () {
-			console.log(template.content.querySelector('p'))
-			console.log(template)
-		}, 2000);
-
+			// var span = document.createElement('span');
+			// span.innerText = 'created';
+			// source.appendChild(span);
+		},
+		attached: function () {
+			console.log('attached');
+		},
+		detached: function () {
+			console.log('detached');
+		},
+		attributed: function (attribute) {
+			console.log('attributed');
+			console.log(attributeName);
+		}
 	});
 
 </script>

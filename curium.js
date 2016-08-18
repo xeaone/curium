@@ -1,52 +1,47 @@
-'use strict';
 
 (function () {
+	'use strict';
 
 	window.addEventListener('DOMContentLoaded', function () {
 		document.body.style.opacity = 0; // hide body
 	});
 
 	window.addEventListener('WebComponentsReady', function() {
-		window.dispatchEvent(new CustomEvent('CuriumLoaded'));
 		document.body.style.opacity = 1; // show body
 	});
 
 	/*
 		Component
 	*/
-	function Component (tag, options) {
+	function Component (options) {
 		var self = this;
 
-		self.tag = tag;
+		if (!options) throw new Error('Curium.component: options missing');
 
-		if (isEmpty(options)) options = {};
+		if (options.templateUrl) self.template = options.templateUrl;
+		else if (options.templateElement) self.template = options.templateElement;
+		else if (options.templateString) self.template = toDom(options.templateString);
+		else if (options.templateMultiline) self.template = toDom(options.templateMultiline);
+		else if (options.templateQuery) self.template = document._currentScript.ownerDocument.querySelector(options.templateQuery);
 
-		if (isTemplate(options.template)) { self.template = options.template; }
-		else if (isEmpty(self.template)) { self.template = document._currentScript.ownerDocument.querySelector('template'); }
-		else if (isString(options.template)) { self.template = document.createElement('template'); self.template.innerHTML = options.template; }
-		else if (isFunction(options.template)) { self.template = document.createElement('template'); self.template.innerHTML = multilineParse(options.template); }
-
-		self.templateContent = self.template.content;
-
+		self.tag = options.tag;
+		self.extends = options.extends;
+		self.attributes = getAttributes(self.tag);
 		self.element = Object.create(HTMLElement.prototype);
-		self._attributes = getAttributes(self.tag);
 
-		if (options.attached) self.element.attachedCallback = options.attached;
-		if (options.detached) self.element.detachedCallback = options.detached;
-		if (options.attributed) self.element.attributeChangedCallback = options.attributed;
-		if (options.attributes) options.attributes(self._attributes);
+		self.element.attachedCallback = options.attached;
+		self.element.detachedCallback = options.detached;
+		self.element.attributeChangedCallback = options.attributed;
 
 		self.element.createdCallback = function () {
-			if (options.created) self.templateContent = options.created(self.templateContent) || self.templateContent;
-
-			// this refers to the target element
-			this.appendChild(document.importNode(self.templateContent, true));
+			if (options.templateUrl) return getTemplateUrl(self.template, self, this, options, callbackTemplateUrl);
+			if (options.created) options.created(self.template.content, this);
+			this.appendChild(document.importNode(self.template.content, true));
 		};
 
-		// register must be last
 		document.registerElement(self.tag, {
 			prototype: self.element,
-			extends: options.extends
+			extends: self.extends
 		});
 	}
 
@@ -55,19 +50,45 @@
 	*/
 	window.Curium = {
 		components: [],
-		component:  function (name, options) {
-			var component = new Component(name, options);
-			this.components.push(component);
-			return component;
+		component:  function (options) {
+			this.components.push(new Component(options));
+			return this.components[this.components.length-1];
 		}
 	};
 
 	/*
 		Internal
 	*/
-	function multilineParse(fn) {
+	function callbackTemplateUrl (error, self, target, options, data) {
+		self.template = toDom(data);
+
+		if (options.created) options.created(self.template.content, target);
+		target.appendChild(document.importNode(self.template.content, true));
+	}
+
+	function getTemplateUrl (path, self, target, options, callback) {
+		var xhr = new XMLHttpRequest();
+
+		xhr.open('GET', path, true);
+		xhr.onreadystatechange = onreadystatechange;
+		xhr.send();
+
+		function onreadystatechange () {
+			if (xhr.readyState === xhr.DONE && xhr.status === 200) return callback(null, self, target, options, xhr.response);
+			else if (xhr.readyState === xhr.DONE && xhr.status !== 200) return callback(xhr);
+		}
+	}
+
+	function multiline(fn) {
 		var multilineComment = /\/\*!?(?:\@preserve)?[ \t]*(?:\r\n|\n)([\s\S]*?)(?:\r\n|\n)\s*\*\//;
-		return typeof fn === 'function' ? multilineComment.exec(fn.toString())[1] : fn;
+
+		if (typeof fn !== 'function') throw new TypeError('Multiline function missing');
+
+		var match = multilineComment.exec(fn.toString());
+
+		if (!match) throw new TypeError('Multiline comment missing');
+
+		return match[1];
 	}
 
 	function getAttributes (query) {
@@ -91,6 +112,13 @@
 		}
 
 		return attributesNew;
+	}
+
+	function toDom (data) {
+		if (typeof data === 'function') data = multiline(data);
+		var container = document.createElement('container');
+		container.innerHTML = data;
+		return container.children[0];
 	}
 
 	function toCamelCase (string) {
@@ -117,30 +145,6 @@
 
 	function isUpperCase (char) {
 		return (char >= 'A') && (char <= 'Z');
-	}
-
-	function isTemplate (value) {
-		if (value === null || value === undefined) return false;
-		else return value.constructor === HTMLTemplateElement;
-	}
-
-	function isEmpty (value) {
-		return value === null || value === undefined;
-	}
-
-	function isObject (value) {
-		if (value === null || value === undefined) return false;
-		else return value.constructor === Object;
-	}
-
-	function isString (value) {
-		if (value === null || value === undefined) return false;
-		else return value.constructor === String;
-	}
-
-	function isFunction (value) {
-		if (value === null || value === undefined) return false;
-		else return value.constructor === Function;
 	}
 
 })();
