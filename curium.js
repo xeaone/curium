@@ -1,4 +1,3 @@
-
 (function () {
 	'use strict';
 
@@ -11,10 +10,10 @@
 	});
 
 	/*
-		Component
+		component
 	*/
 	function Component (options) {
-		var self = this;
+		var self = {};
 
 		if (!options) throw new Error('Curium.component: options missing');
 
@@ -26,47 +25,59 @@
 
 		self.tag = options.tag;
 		self.extends = options.extends;
-		self.attributes = getAttributes(self.tag);
-		self.element = Object.create(HTMLElement.prototype);
+		self.element = document.querySelector(self.tag);
+		self.proto = Object.create(HTMLElement.prototype);
+		self.attribute = getAttributeObject(self.element, {});
 
-		self.element.attachedCallback = options.attached;
-		self.element.detachedCallback = options.detached;
-		self.element.attributeChangedCallback = options.attributed;
+		self.proto.createdCallback = function () {
+			var element = this;
 
-		self.element.createdCallback = function () {
-			if (options.templateUrl) return getTemplateUrl(self.template, self, this, options, callbackTemplateUrl);
-			if (options.created) options.created(self.template.content, this);
-			this.appendChild(document.importNode(self.template.content, true));
+			if (options.templateUrl) {
+				getTemplateUrl(options.templateUrl, function (data) {
+					self.template = toDom(data);
+
+					if (options.created) options.created(self);
+					element.appendChild(document.importNode(self.template.content, true));
+				});
+			}
+			else {
+				if (options.created) options.created(self);
+				element.appendChild(document.importNode(self.template.content, true));
+			}
+		};
+
+		self.proto.attachedCallback = function () {
+			if (options.attached) options.attached(self);
+		};
+
+		self.proto.detachedCallback = function () {
+			if (options.detached) options.detached(self);
+		};
+
+		self.proto.attributeChangedCallback = function (name) {
+			if (options.attributed) options.attributed(self, name);
 		};
 
 		document.registerElement(self.tag, {
-			prototype: self.element,
+			prototype: self.proto,
 			extends: self.extends
 		});
+
+		return self;
 	}
 
 	/*
-		Assign
+		assign
 	*/
 	window.Curium = {
-		components: [],
-		component:  function (options) {
-			this.components.push(new Component(options));
-			return this.components[this.components.length-1];
-		}
+		component: Component
 	};
 
 	/*
-		Internal
+		internal
 	*/
-	function callbackTemplateUrl (error, self, target, options, data) {
-		self.template = toDom(data);
 
-		if (options.created) options.created(self.template.content, target);
-		target.appendChild(document.importNode(self.template.content, true));
-	}
-
-	function getTemplateUrl (path, self, target, options, callback) {
+	function getTemplateUrl (path, callback) {
 		var xhr = new XMLHttpRequest();
 
 		xhr.open('GET', path, true);
@@ -74,8 +85,8 @@
 		xhr.send();
 
 		function onreadystatechange () {
-			if (xhr.readyState === xhr.DONE && xhr.status === 200) return callback(null, self, target, options, xhr.response);
-			else if (xhr.readyState === xhr.DONE && xhr.status !== 200) return callback(xhr);
+			if (xhr.readyState === xhr.DONE && xhr.status === 200) return callback(xhr.response);
+			else if (xhr.readyState === xhr.DONE && xhr.status !== 200) throw new Error('getTemplateUrl: ' + xhr.status + ' ' + xhr.statusText);
 		}
 	}
 
@@ -91,27 +102,34 @@
 		return match[1];
 	}
 
-	function getAttributes (query) {
-		var attributesOld = document.querySelector(query).attributes;
-		var attributesNew = {};
+	function getAttributeObject (element, attribute) {
+		var attributes = element.attributes;
+		var self = {};
 
-		if (attributesOld.length > 0) {
-			var l = attributesOld.length;
-			var i = 0;
-			var name = null;
-			var value = null;
-
-			for (i; i < l; i++) {
-				name = attributesOld[i].name;
-				value = attributesOld[i].value;
-
-				name = (name.search('-') === -1) ? name : toCamelCase(name);
-
-				attributesNew[name] = value;
-			}
+		for (var c = 0; c < element.attributes.length; c++) {
+			attribute[attributes[c].name] = attributes[c].value;
 		}
 
-		return attributesNew;
+		function options (name) {
+			return {
+				enumerable:true,
+				configurable: true,
+				get: function () {
+					return attribute[name];
+				},
+				set: function (value) {
+					attribute[name] = value;
+					element.setAttribute(name, value);
+				}
+			};
+		}
+
+		for (var i = 0; i < attributes.length; i++) {
+			var name = attributes[i].name;
+			Object.defineProperty(self, name, options(name));
+		}
+
+		return self;
 	}
 
 	function toDom (data) {
@@ -119,32 +137,6 @@
 		var container = document.createElement('container');
 		container.innerHTML = data;
 		return container.children[0];
-	}
-
-	function toCamelCase (string) {
-		var nextIndex = string.search('-') + 1;
-		var nextLetter = string.charAt(nextIndex).toString();
-		var r = '-' + nextLetter;
-		var n = nextLetter.toUpperCase();
-		return string.replace(r, n);
-	}
-
-	function fromCamelCase (string) {
-		var firstChar = string.charAt(0).toString();
-
-		string = string.replace(firstChar, firstChar.toLowerCase());
-
-		// replace upper case with hypeh and lower cased char
-		for (var i = 0; i < string.length; i++) {
-			var char = string[i];
-			if (isUpperCase(char)) string = string.replace(char, '-' + char.toLowerCase());
-		}
-
-		return string;
-	}
-
-	function isUpperCase (char) {
-		return (char >= 'A') && (char <= 'Z');
 	}
 
 })();

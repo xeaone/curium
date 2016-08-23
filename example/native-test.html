@@ -6,9 +6,7 @@
 <script type="text/javascript">
 
 	var templateElement = document._currentScript.ownerDocument.querySelector('template');
-
 	var templateString = '<template><p>templateString</p></template>';
-
 	var templateMultiline = function () {/*!@preserve
 
 		<template>
@@ -23,22 +21,26 @@
 		// templateMultiline: templateString,
 		// templateMultiline: templateMultiline,
 		// templateQuery: 'template',
-		created: function (source, target) {
+		created: function (self) {
 			console.log('created');
 
-			// var span = document.createElement('span');
-			// span.innerText = 'created';
-			// source.appendChild(span);
+			var span = document.createElement('span');
+			span.innerText = 'created';
+			self.template.content.appendChild(span);
 		},
-		attached: function () {
+		attached: function (self) {
 			console.log('attached');
+
+			self.attribute['data-world'] = 'hello';
 		},
-		detached: function () {
+		detached: function (self) {
 			console.log('detached');
 		},
-		attributed: function (attribute) {
+		attributed: function (self, name) {
 			console.log('attributed');
-			console.log(attributeName);
+			
+			console.log(self.attribute);
+			console.log(name);
 		}
 	});
 
