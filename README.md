@@ -17,6 +17,15 @@ Swathe Link: [github.com/AlexanderElias/swathe](https://github.com/AlexanderElia
 - Polymer: varies on version but HUGE
 
 
+## Browser Support ##
+- Chrome
+- Firefox
+- IE 11+/Edge (IE 10 has flaky Mutation Observer)
+- Safari 7+
+- Safari (iOS 7.1)
+- Chrome (Android)
+
+
 ## Usage ##
 - Curium With Pollyfill - `curium.polly.min.js`. This version bundles [webcomponents-lite.js ]
 
