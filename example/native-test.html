@@ -5,8 +5,10 @@
 
 <script type="text/javascript">
 
-	var templateElement = document._currentScript.ownerDocument.querySelector('template');
+	var templateElement = Curium.query('template');
+
 	var templateString = '<template><p>templateString</p></template>';
+
 	var templateMultiline = function () {/*!@preserve
 
 		<template>
@@ -17,16 +19,17 @@
 
 	Curium.component({
 		tag: 'native-test',
-		templateUrl: 'template.html',
-		// templateMultiline: templateString,
+		// templateUrl: 'template.html',
+		// templateString: templateString,
 		// templateMultiline: templateMultiline,
 		// templateQuery: 'template',
+		templateElement: templateElement,
 		created: function (self) {
 			console.log('created');
 
-			var span = document.createElement('span');
-			span.innerText = 'created';
-			self.template.content.appendChild(span);
+			// var span = document.createElement('span');
+			// span.innerText = 'created';
+			// self.template.content.appendChild(span);
 		},
 		attached: function (self) {
 			console.log('attached');
@@ -36,12 +39,16 @@
 		detached: function (self) {
 			console.log('detached');
 		},
-		attributed: function (self, name) {
+		attributed: function (self, name, oldValue, newValue) {
 			console.log('attributed');
-			
+
 			console.log(self.attribute);
 			console.log(name);
+			console.log(oldValue);
+			console.log(newValue);
 		}
 	});
+
+	console.log(Curium.components);
 
 </script>

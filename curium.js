@@ -12,55 +12,59 @@
 	/*
 		component
 	*/
-	function Component (options) {
+	function Component (opt) {
 		var self = {};
 
-		if (!options) throw new Error('Curium.component: options missing');
+		if (!opt) throw new Error('Curium.component: missing options');
+		if (!opt.tag) throw new Error('Curium.component: missing tag');
 
-		if (options.templateUrl) self.template = options.templateUrl;
-		else if (options.templateElement) self.template = options.templateElement;
-		else if (options.templateString) self.template = toDom(options.templateString);
-		else if (options.templateMultiline) self.template = toDom(options.templateMultiline);
-		else if (options.templateQuery) self.template = document._currentScript.ownerDocument.querySelector(options.templateQuery);
+		if (opt.templateUrl) self.template = opt.templateUrl;
+		else if (opt.templateElement) self.template = opt.templateElement;
+		else if (opt.templateString) self.template = toDom(opt.templateString);
+		else if (opt.templateMultiline) self.template = toDom(opt.templateMultiline);
+		else if (opt.templateQuery) self.template = document._currentScript.ownerDocument.querySelector(opt.templateQuery);
 
-		self.tag = options.tag;
-		self.extends = options.extends;
-		self.element = document.querySelector(self.tag);
-		self.proto = Object.create(HTMLElement.prototype);
+		if (opt.proto) opt.proto = Object.create(opt.proto);
+		else opt.proto = Object.create(HTMLElement.prototype);
+
+		self.model = opt.model || {};
+		self.controller = opt.controller || {};
+		self.element = document.querySelector(opt.tag);
 		self.attribute = getAttributeObject(self.element, {});
 
-		self.proto.createdCallback = function () {
+		opt.proto.attachedCallback = function () {
+			if (opt.attached) opt.attached(self);
+		};
+
+		opt.proto.detachedCallback = function () {
+			if (opt.detached) opt.detached(self);
+		};
+
+		opt.proto.attributeChangedCallback = function (name, oldValue, newValue) {
+			if (opt.attributed) opt.attributed(self, name, oldValue, newValue);
+		};
+
+		opt.proto.createdCallback = function () {
 			var element = this;
 
-			if (options.templateUrl) {
-				getTemplateUrl(options.templateUrl, function (data) {
+			if (opt.templateUrl) {
+				getTemplateUrl(opt.templateUrl, function (data) {
 					self.template = toDom(data);
 
-					if (options.created) options.created(self);
+					if (opt.created) opt.created(self);
 					element.appendChild(document.importNode(self.template.content, true));
 				});
 			}
-			else {
-				if (options.created) options.created(self);
+			else if (self.template) {
+				if (opt.created) opt.created(self);
 				element.appendChild(document.importNode(self.template.content, true));
 			}
+			else if (opt.created) opt.created(self);
 		};
 
-		self.proto.attachedCallback = function () {
-			if (options.attached) options.attached(self);
-		};
-
-		self.proto.detachedCallback = function () {
-			if (options.detached) options.detached(self);
-		};
-
-		self.proto.attributeChangedCallback = function (name) {
-			if (options.attributed) options.attributed(self, name);
-		};
-
-		document.registerElement(self.tag, {
-			prototype: self.proto,
-			extends: self.extends
+		document.registerElement(opt.tag, {
+			prototype: opt.proto,
+			extends: opt.extends
 		});
 
 		return self;
@@ -70,13 +74,19 @@
 		assign
 	*/
 	window.Curium = {
-		component: Component
+		components: {},
+		component: function (opt) {
+			this.components[opt.tag] = Component(opt);
+			return this.components[opt.tag];
+		},
+		query: function (query) {
+			return document._currentScript.ownerDocument.querySelector(query);
+		}
 	};
 
 	/*
 		internal
 	*/
-
 	function getTemplateUrl (path, callback) {
 		var xhr = new XMLHttpRequest();
 

@@ -1,10 +1,10 @@
 {
   "name": "curium",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Curium - Web Component Library/Framework Powerful &amp; Small",
   "main": "curium.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": ""
   },
   "repository": {
     "type": "git",
