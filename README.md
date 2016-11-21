@@ -39,6 +39,8 @@ Returns an instance of the Curium object.
 - components: `Object`
 - component: `Function`
 - query: `Function`
+- script: `Function`
+- document: `Function`
 
 ### Curium.components ###
 Returns an object with all the custom components by there custom tag name. Helps keep the global scope clean.
@@ -48,7 +50,7 @@ Returns an object with all the custom components by there custom tag name. Helps
 	- Curium.component
 
 
-### Curium.component ###
+### Curium.component() ###
 Returns a custom component object. Accepts an options object.
 
 **Properties**
@@ -59,14 +61,14 @@ Returns a custom component object. Accepts an options object.
 - model (If using Swathe it is a special Swathe model otherwise it is just an object)
 
 **Required Options**
-- tag: `String` *required*
+- tag: `String` *required* (Note must be of format `start-end`)
 
 **Template Options**
-- templateElement: `Object` DOM element
-- templateUrl: `String` path to template us XHR
-- templateString: `String` variable containing html
-- templateMultiline: `Function` multiline comment inside function
-- templateQuery: `String` querySelector on the current script (Tip will not work if `Curium.component(options)` is wrapped by function such as event listener)
+- template: `HTMLElement` DOM element
+- template: `String` string containing html (Note must begin with a html tag `<ANY-TAG>` even an html comment will work)
+- template: `String` path to template using XHR (Note must begin with `./` , `/`, or `http`)
+- template: `Function` multiline comment inside function `function () {/* <template>I can span multiple lines</template> */}`
+- template: `String` querySelector on the current script (Note will not work if `Curium.component(options)` is wrapped by function such as event listener)
 
 **Methods Options**
 - created: `Function` callback fired when custom element is created. Parameter is it's self.
@@ -75,8 +77,16 @@ Returns a custom component object. Accepts an options object.
 - attributed: `Function` callback fired when custom element is created. Parameter is it's self.
 
 
-### Curium.query ###
+### Curium.query() ###
 Query selector on the current scripts document. Essentially a wrapper for `document._currentScript.ownerDocument.querySelector(query)` but in the current html document.
+
+
+### Curium.script() ###
+Convenience and compatibility `document._currentScript`.
+
+
+### Curium.document() ###
+Convenience and compatibility `document._currentScript.ownerDocument`.
 
 
 ## Examples ##
@@ -115,7 +125,7 @@ Curium.component({
 
 var templateString = '<template><p>templateString</p></template>';
 
-var templateMultiline = function () {/*!@preserve
+var templateMultiline = function () {/*
 
 	<template>
 		<p>templateMultiline</p>
@@ -125,9 +135,9 @@ var templateMultiline = function () {/*!@preserve
 
 Curium.component({
 	tag: 'c-tag',
-	templateUrl: 'template.html', // path to template.html file
-	templateString: templateString,
-	templateMultiline: templateMultiline,
+	template: './template.html', // path to template.html file
+	template: templateString,
+	template: templateMultiline,
 });
 ```
 
@@ -144,9 +154,8 @@ var templateElement = Curium.query('template');
 
 Curium.component({
 	tag: 'c-tag',
-	templateQuery: 'template',
-	templateUrl: 'template.html', // path to template.html file
-	templateElement: templateElement,
+	template: 'template',
+	template: templateElement,
 });
 </script>
 ```

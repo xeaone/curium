@@ -1,31 +1,31 @@
+<style>
+
+</style>
 
 <template>
 	<p>Hello World</p>
 </template>
 
-<script type="text/javascript">
+<script>
 
 	var templateElement = Curium.query('template');
-
 	var templateString = '<template><p>templateString</p></template>';
-
 	var templateMultiline = function () {/*!@preserve
-
 		<template>
 			<p>templateMultiline</p>
 		</template>
-
 	*/};
 
 	Curium.component({
 		tag: 'native-test',
-		// templateUrl: 'template.html',
-		// templateString: templateString,
-		// templateMultiline: templateMultiline,
-		// templateQuery: 'template',
-		templateElement: templateElement,
+		// template: 'template.html',
+		// template: templateString,
+		// template: templateMultiline,
+		// template: templateElement,
+		template: 'template',
 		created: function (self) {
 			console.log('created');
+			console.log(self);
 
 			// var span = document.createElement('span');
 			// span.innerText = 'created';
@@ -48,7 +48,5 @@
 			console.log(newValue);
 		}
 	});
-
-	console.log(Curium.components);
 
 </script>
