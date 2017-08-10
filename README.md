@@ -7,9 +7,6 @@ Curium is a custom web component library/framework. Curium has two main flavors 
 Swathe Link: [github.com/AlexanderElias/swathe](https://github.com/AlexanderElias/swathe)
 
 
-**CAUTION this project/docs is still under the final stages of development. The API should be finalized soon**
-
-
 ## Minified Sizes ##
 - **Curium: 2.04 KB**
 - **Curium + Swathe: 3.39 KB**
