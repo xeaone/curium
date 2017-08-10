@@ -1,5 +1,6 @@
 # Curium #
-**Curium - Web Component Library/Framework**
+
+**Development moved [github.com/AlexanderElias/jenie](https://github.com/AlexanderElias/jenie) **
 
 Curium is a custom web component library/framework. Curium has two main flavors **Curium** and **Curium + Swathe**. Curium is your main custom elements library similar to X-tag and Skate. Curium + Swathe is your custom components library plus fancy data binding features in which case it is more like Polymer but more performant and way way smaller.
 
