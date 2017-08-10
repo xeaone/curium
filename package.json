@@ -1,6 +1,6 @@
 {
   "name": "curium",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Curium - Web Component Library/Framework Powerful &amp; Small",
   "main": "curium.js",
   "scripts": {
